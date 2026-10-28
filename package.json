@@ -1,0 +1,37 @@
+{
+  "name": "the-boxx-buchung",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0 <25"
+  },
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "jobs:run": "node --env-file-if-exists=.env.local --import tsx scripts/jobs.ts",
+    "format": "prettier --write app components lib scripts tests next.config.mjs package.json tsconfig.json",
+    "setup:check": "node --env-file-if-exists=.env.local --import tsx scripts/check-config.ts"
+  },
+  "dependencies": {
+    "google-auth-library": "^10.3.0",
+    "next": "16.3.8",
+    "pg": "^8.16.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.3.14",
+    "@types/node": "^22.19.0",
+    "@types/pg": "^8.15.5",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "prettier": "3.9.10",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
