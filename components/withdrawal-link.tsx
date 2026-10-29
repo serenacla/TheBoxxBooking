@@ -1,0 +1,2 @@
+import { deployment } from "@/lib/deployment";
+export default function WithdrawalLink(){return <div style={{position:"fixed",bottom:12,left:12,zIndex:10000,maxWidth:"calc(100vw - 24px)",background:"#fff",color:"#111",border:"2px solid #e11d48",borderRadius:12,padding:"10px 16px",boxShadow:"0 4px 20px #0002"}}><a style={{color:"inherit",fontWeight:700,textDecoration:"underline"}} href={deployment.mode==="booking"?"/vertrag-widerrufen":"/widerrufe"}>{deployment.mode==="booking"?"Vertrag widerrufen":"Widerrufe verwalten"}</a></div>;}

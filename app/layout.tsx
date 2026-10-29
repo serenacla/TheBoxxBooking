@@ -1,3 +1,4 @@
+import WithdrawalLink from "@/components/withdrawal-link";
 import type { Metadata } from "next";
 import { deployment } from "@/lib/deployment";
 import "./globals.css";
@@ -16,7 +17,10 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="de">
-      <body>{children}</body>
+     <body>
+  {children}
+  <WithdrawalLink />
+</body>
     </html>
   );
 }
