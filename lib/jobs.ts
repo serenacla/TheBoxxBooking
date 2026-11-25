@@ -1,3 +1,4 @@
+import { mailProvider } from "./mail-config";
 import { randomUUID } from "node:crypto";
 import { query, transaction } from "./db";
 import { sendMail, type MailPayload } from "./mail";
@@ -33,6 +34,9 @@ export async function runJobs(limit = 3) {
           }
         });
       else {
+        // SMTP has no idempotency guarantee. A crashed or ambiguous send requires review.
+        if (mailProvider() === "smtp" && j.attempts > 1)
+          throw new Error("SMTP-Versandstatus unklar. Eingang beim Empfänger prüfen und erst danach manuell erneut senden.");
         // Resend deduplicates for 24 hours. Old ambiguous sends need human review.
         if (
           j.attempts > 1 &&
@@ -60,7 +64,7 @@ export async function runJobs(limit = 3) {
       await query(
         "UPDATE jobs SET status=$1,last_error=$2,available_at=now()+$3*interval '1 second',locked_at=null WHERE id=$4 AND lock_token=$5",
         [
-          j.attempts >= 8 || expired ? "failed" : "pending",
+          (j.kind === "email" && mailProvider() === "smtp") || j.attempts >= 8 || expired ? "failed" : "pending",
           e instanceof Error
             ? e.message.slice(0, 200)
             : "Übertragung fehlgeschlagen.",

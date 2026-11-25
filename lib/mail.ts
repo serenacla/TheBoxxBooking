@@ -1,3 +1,5 @@
+import { mailConfigured, mailProvider } from "./mail-config";
+import { sendSmtp } from "./smtp";
 import { baseUrl } from "./http";
 import { calendarFile, bookingText, googleCalendarLink } from "./calendar";
 import { signToken } from "./crypto";
@@ -61,8 +63,9 @@ export function bookingMail(
   };
 }
 export async function sendMail(payload: MailPayload, key: string) {
-  if (!process.env.RESEND_API_KEY || !process.env.MAIL_FROM)
+  if (!mailConfigured())
     throw new Error("E-Mail-Versand noch nicht eingerichtet.");
+  if (mailProvider() === "smtp") return sendSmtp(payload, key);
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {

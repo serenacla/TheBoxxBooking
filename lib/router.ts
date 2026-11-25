@@ -1,3 +1,4 @@
+import { mailConfigured } from "./mail-config";
 import { NextResponse, after } from "next/server";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
@@ -86,7 +87,7 @@ async function enqueueAuth(
   user: { id: string; email: string; name: string },
   kind: "invite" | "reset",
 ) {
-  if (!process.env.RESEND_API_KEY || !process.env.MAIL_FROM)
+  if (!mailConfigured())
     throw new AppError(503, "E-Mail-Versand ist noch nicht eingerichtet.");
   const token = randomToken();
   const url = `${baseUrl("admin")}/passwort?token=${token}`;
@@ -355,7 +356,7 @@ export const route = (req: Request) =>
         users,
         connections: {
           google: await googleConnected(),
-          mail: !!(process.env.RESEND_API_KEY && process.env.MAIL_FROM),
+          mail: mailConfigured(),
           oauth: !!(
             process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
           ),
@@ -592,6 +593,18 @@ export const route = (req: Request) =>
         await audit(a.id, "team.updated", null, { userId: id });
       });
       return json({ ok: true });
+    }
+    if (path === "admin/mail-test" && method === "POST") {
+      const a = await requireActor(["owner"]);
+      await rateLimit(`mail-test:${a.id}`, 3, 900);
+      if (!mailConfigured()) throw new AppError(503, "SMTP-Konfiguration fehlt. Netlify-Variablen prüfen und neu deployen.");
+      const key = "mail-test:" + randomUUID();
+      await query("INSERT INTO jobs(unique_key,kind,payload) VALUES($1,'email',$2)", [key,
+        JSON.stringify({encrypted: encrypt(JSON.stringify({from: process.env.MAIL_FROM,
+          to: a.email, subject: "THE BOXX · Test des E-Mail-Versands",
+          text: "Diese Testnachricht wurde aus der THE BOXX Verwaltung angefordert. Es wurde keine Buchung angelegt oder geändert."}))})]);
+      asyncJobs();
+      return json({message: `Testmail an ${a.email} eingereiht. Bitte Posteingang und Spam prüfen. Versandstatus unter Synchronisierung kontrollieren.`});
     }
     if (path === "admin/jobs/retry" && method === "POST") {
       const a = await requireActor(["owner", "manager"]);

@@ -1,3 +1,4 @@
+import { mailConfigured } from "./mail-config";
 import { createHash, randomUUID } from "node:crypto";
 import type { PoolClient } from "pg";
 import { query, transaction } from "./db";
@@ -47,8 +48,7 @@ export async function assertReady(s: Settings) {
     !s.privacy ||
     !s.terms ||
     !s.calendarId ||
-    !process.env.RESEND_API_KEY ||
-    !process.env.MAIL_FROM ||
+    !mailConfigured() ||
     !(await googleConnected())
   )
     throw new AppError(

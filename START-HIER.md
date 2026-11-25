@@ -1,3 +1,5 @@
+> Neu: Für den Versand über booking@the-boxx.de zuerst SMTP-EINRICHTUNG.md lesen. Die dortigen SMTP-Einstellungen ersetzen die älteren Resend-Anweisungen.
+
 # Hier starten · THE BOXX Buchung
 
 **Diese Datei gehört zum Buchungsprojekt.** Du hast zwei getrennte ZIPs erhalten. Jedes ZIP ergibt ein eigenes GitHub-Repository und eine eigene Website. Beide werden über dieselbe Datenbank verbunden.

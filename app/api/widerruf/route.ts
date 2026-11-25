@@ -1,3 +1,4 @@
+import { mailConfigured } from "@/lib/mail-config";
 import { after } from "next/server";
 import { randomUUID } from "node:crypto";
 import { body, handle, json, sameOrigin, publicMode, AppError, baseUrl } from "@/lib/http";
@@ -10,7 +11,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 async function queueMails(id:string) {
  const from = process.env.MAIL_FROM;
- if (!from || !process.env.RESEND_API_KEY) return false;
+ if (!from || !mailConfigured()) return false;
  const settings = (await getSettings()).data;
  const [row] = await query("SELECT * FROM withdrawals WHERE id=$1", [id]);
  if (!row) throw new AppError(404,"Vorgang nicht gefunden.");
@@ -63,7 +64,7 @@ export async function PATCH(req:Request){return handle(async()=>{
  if(!/^[0-9a-f-]{36}$/i.test(data.id || "")) throw new AppError(400,"Ungültiger Vorgang.");
  if(data.action==="queue") {
   const queued=await queueMails(data.id);
-  if(!queued) throw new AppError(503,"MAIL_FROM und RESEND_API_KEY fehlen. Erklärung bleibt gespeichert.");
+  if(!queued) throw new AppError(503,"E-Mail-Versand ist noch nicht vollständig eingerichtet. Erklärung bleibt gespeichert.");
   after(async()=>{try{await runJobs(3);}catch{console.error("Withdrawal dispatch deferred");}});
  } else if(data.action==="review") {
   await query("UPDATE withdrawals SET reviewed_at=now(),reviewed_by=$2 WHERE id=$1",[data.id,user.id]);

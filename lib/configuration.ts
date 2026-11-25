@@ -1,3 +1,4 @@
+import { mailConfigurationIssues } from "./mail-config";
 import { deployment } from "./deployment";
 
 export function configurationIssues(
@@ -57,13 +58,12 @@ export function configurationIssues(
   if ((env.CRON_SECRET ?? "").length < 32)
     issues.push("CRON_SECRET: mindestens 32 zufällige Zeichen eintragen.");
   for (const name of [
-    "RESEND_API_KEY",
-    "MAIL_FROM",
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
   ]) {
     if (!env[name]?.trim()) issues.push(`${name}: noch nicht hinterlegt.`);
   }
+  issues.push(...mailConfigurationIssues(env));
   if (env.MAIL_FROM?.includes("your-domain.de"))
     issues.push(
       "MAIL_FROM: verifizierte eigene Absenderadresse statt Beispieldomain eintragen.",
